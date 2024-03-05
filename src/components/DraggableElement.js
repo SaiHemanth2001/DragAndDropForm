@@ -9,7 +9,7 @@ const DraggableElement = ({ type, children }) => {
     <div
       draggable
       onDragStart={handleDragStart}
-      className="p-2 bg-gray-100 cursor-pointer"
+      className="p-2 bg-gray-100 cursor-pointer w-full"
     >
       {children}
     </div>
