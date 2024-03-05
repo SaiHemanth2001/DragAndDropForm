@@ -15,10 +15,10 @@ const FormBuilder = () => {
   };
 
   return (
-    <div className="w-full md:w-3/4 p-4">
+    <div className="w-3/4 p-4">
       <h2 className="text-lg font-bold mb-4">Form Builder</h2>
-      <div className="border border-gray-200 p-4 h-auto md:h-64 flex justify-center items-center" onDrop={handleDrop} onDragOver={handleDragOver}>
-        <form className="w-full">
+      <div className="border border-gray-200 h-64 flex justify-center items-center" onDrop={handleDrop} onDragOver={handleDragOver}>
+        <form>
           {formElements.map((element, index) => (
             <FormElement key={index} type={element.type} />
           ))}

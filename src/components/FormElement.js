@@ -6,21 +6,21 @@ const FormElement = ({ type }) => {
 
   switch (type) {
     case 'text':
-      element = <input type="text" className="border rounded p-2 mb-2 w-full" />;
-      elementName = "Text Field";
+      element = <input type="text" className="border rounded p-2 mb-2" />;
+      elementName = "Text Field"; 
       break;
     case 'textarea':
-      element = <textarea className="border rounded p-2 mb-2 w-full" />;
+      element = <textarea className="border rounded p-2 mb-2" />;
       elementName = "Textarea";
       break;
     case 'radio':
       element = (
         <div>
-          <label className="block mb-2">
+          <label className="mr-2">
             <input type="radio" name="radioGroup" value="option1" />
             Option 1
           </label>
-          <label className="block">
+          <label>
             <input type="radio" name="radioGroup" value="option2" />
             Option 2
           </label>
@@ -33,7 +33,7 @@ const FormElement = ({ type }) => {
   }
 
   return (
-    <div className="mb-4">
+    <div className="mb-2">
       <p className="text-sm font-bold">{elementName}</p>
       {element}
     </div>
