@@ -11,7 +11,6 @@ const Toolbox = () => {
         <DraggableElement type="radio">Radio Button</DraggableElement>
         <DraggableElement type="rating">Rating Field</DraggableElement>
         <DraggableElement type="time">Time Field</DraggableElement>
-        {/* Add more draggable elements for other form fields here */}
       </div>
     </div>
   );
