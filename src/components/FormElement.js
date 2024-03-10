@@ -1,43 +1,46 @@
+// FormElement.js
 import React from 'react';
 
-const FormElement = ({ type }) => {
-  let element = null;
-  let elementName = null;
-
+const FormElement = ({ type, content, onChange, ...rest }) => {
   switch (type) {
     case 'text':
-      element = <input type="text" className="border rounded p-2 mb-2" />;
-      elementName = "Text Field"; 
-      break;
+      return <input type="text" value={content} onChange={(e) => onChange(e.target.value)} {...rest} />;
     case 'textarea':
-      element = <textarea className="border rounded p-2 mb-2" />;
-      elementName = "Textarea";
-      break;
+      return <textarea value={content} onChange={(e) => onChange(e.target.value)} {...rest}></textarea>;
     case 'radio':
-      element = (
+      return (
         <div>
-          <label className="mr-2">
-            <input type="radio" name="radioGroup" value="option1" />
-            Option 1
-          </label>
-          <label>
-            <input type="radio" name="radioGroup" value="option2" />
-            Option 2
-          </label>
+          {["Option 1", "Option 2", "Option 3"].map((option, index) => (
+            <div key={index}>
+              <label>
+                <input
+                  type="radio"
+                  value={option}
+                  checked={content === option}
+                  onChange={(e) => onChange(e.target.value)}
+                />
+                {option}
+              </label>
+            </div>
+          ))}
         </div>
       );
-      elementName = "Radio Button";
-      break;
+    case 'rating':
+      const ratingStars = [...Array(5)].map((_, i) => (
+        <span
+          key={i}
+          className={i < parseInt(content) ? "text-yellow-500 cursor-pointer" : "text-gray-300 cursor-pointer"}
+          onClick={() => onChange(i + 1)}
+        >
+          ★
+        </span>
+      ));
+      return <div>{ratingStars}</div>;
+    case 'time':
+      return <input type="time" value={content} onChange={(e) => onChange(e.target.value)} {...rest} />;
     default:
-      element = null;
+      return null;
   }
-
-  return (
-    <div className="mb-2">
-      <p className="text-sm font-bold">{elementName}</p>
-      {element}
-    </div>
-  );
 };
 
 export default FormElement;
