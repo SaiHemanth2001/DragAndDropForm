@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
+import { useDrop } from 'react-dnd';
+import { ItemTypes } from './ItemTypes';
 
-const FormBuilder = ({ selectedElement }) => {
-  const [formElements, setFormElements] = useState([]);
+const FormBuilder = () => {
+  const [selectedElement, setSelectedElement] = useState(null);
   const [question, setQuestion] = useState('');
   const [options, setOptions] = useState([]);
   const [optionInput, setOptionInput] = useState('');
+  const [formElements, setFormElements] = useState([]);
 
   const handleAddOption = () => {
     if (optionInput.trim() !== '') {
@@ -13,18 +16,22 @@ const FormBuilder = ({ selectedElement }) => {
     }
   };
 
-  const handleAddElement = () => {
-    let element;
-    let elementLabel;
+  const handleAddElement = (element) => {
+    setSelectedElement(element);
+    setQuestion('');
+  };
+
+  const handleAddFormElement = () => {
+    let newElement = null;
     switch (selectedElement) {
       case 'Text Input':
-        element = <input type="text" className="input border border-gray-400 focus:border-blue-500 focus:ring-blue-500" />;
+        newElement = <input type="text" className="input border border-gray-400 focus:border-blue-500 focus:ring-blue-500" />;
         break;
       case 'Textarea':
-        element = <textarea className="input border border-gray-400 focus:border-blue-500 focus:ring-blue-500" />;
+        newElement = <textarea className="input border border-gray-400 focus:border-blue-500 focus:ring-blue-500" />;
         break;
       case 'Select':
-        element = (
+        newElement = (
           <select className="input border border-gray-400 focus:border-blue-500 focus:ring-blue-500">
             <option value="">Select...</option>
             {options.map((option, index) => (
@@ -34,7 +41,7 @@ const FormBuilder = ({ selectedElement }) => {
         );
         break;
       case 'Checkbox':
-        element = (
+        newElement = (
           <div>
             {options.map((option, index) => (
               <div key={index} className="flex items-center mb-2">
@@ -46,7 +53,7 @@ const FormBuilder = ({ selectedElement }) => {
         );
         break;
       case 'Single Choice':
-        element = (
+        newElement = (
           <div>
             {options.map((option, index) => (
               <div key={index} className="flex items-center mb-2">
@@ -58,16 +65,28 @@ const FormBuilder = ({ selectedElement }) => {
         );
         break;
       default:
-        element = null;
+        break;
     }
-    elementLabel = `${question}?`;
-    setFormElements(prevState => [...prevState, { element, elementLabel }]);
+
+    const newFormElement = {
+      element: newElement,
+      elementLabel: `${question}?`,
+    };
+
+    setFormElements([...formElements, newFormElement]);
     setQuestion('');
     setOptions([]);
   };
 
+  const [, drop] = useDrop({
+    accept: ItemTypes.ELEMENT,
+    drop(item) {
+      handleAddElement(item.name);
+    },
+  });
+
   return (
-    <div className="container mx-auto flex flex-col h-full p-6 bg-gray-100 rounded-lg shadow-md">
+    <div ref={drop} className="container mx-auto flex flex-col h-full p-6 bg-gray-100 rounded-lg shadow-md">
       {selectedElement && (
         <div className="mb-8">
           <input
@@ -77,7 +96,7 @@ const FormBuilder = ({ selectedElement }) => {
             onChange={(e) => setQuestion(e.target.value)}
             className="input border border-gray-400 focus:border-blue-500 focus:ring-blue-500 mb-4"
           />
-          {(selectedElement === 'Checkbox' || selectedElement === 'Single Choice' || selectedElement === 'Select') && (
+          {(selectedElement === 'Checkbox' || selectedElement === 'Select' || selectedElement === 'Single Choice') && (
             <div className="flex items-center">
               <input
                 type="text"
@@ -101,7 +120,7 @@ const FormBuilder = ({ selectedElement }) => {
           </div>
           <button
             className="btn mt-4 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded shadow"
-            onClick={handleAddElement}
+            onClick={handleAddFormElement}
           >
             Add {selectedElement}
           </button>

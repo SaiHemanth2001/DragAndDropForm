@@ -1,6 +1,25 @@
 import React from 'react';
+import { useDrag } from 'react-dnd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFont, faAlignLeft, faList, faCheckSquare, faCircle } from '@fortawesome/free-solid-svg-icons';
+import { ItemTypes } from './ItemTypes';
+
+const Element = ({ name, icon }) => {
+  const [, drag] = useDrag({
+    type: ItemTypes.ELEMENT,
+    item: { name },
+  });
+
+  return (
+    <button
+      ref={drag}
+      className="block w-full bg-white hover:bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-sm flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+    >
+      <FontAwesomeIcon icon={icon} className="text-blue-500" />
+      <span>{name}</span>
+    </button>
+  );
+};
 
 const ElementList = ({ setSelectedElement }) => {
   const elements = [
@@ -17,13 +36,7 @@ const ElementList = ({ setSelectedElement }) => {
       <ul className="space-y-2">
         {elements.map((element, index) => (
           <li key={index}>
-            <button
-              className="block w-full bg-white hover:bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-sm flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              onClick={() => setSelectedElement(element.name)}
-            >
-              <FontAwesomeIcon icon={element.icon} className="text-blue-500" />
-              <span>{element.name}</span>
-            </button>
+            <Element name={element.name} icon={element.icon} />
           </li>
         ))}
       </ul>
