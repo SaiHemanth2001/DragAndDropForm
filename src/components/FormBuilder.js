@@ -1,136 +1,135 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDrop } from 'react-dnd';
 import { ItemTypes } from './ItemTypes';
 
-const FormBuilder = () => {
-  const [selectedElement, setSelectedElement] = useState(null);
-  const [question, setQuestion] = useState('');
-  const [options, setOptions] = useState([]);
-  const [optionInput, setOptionInput] = useState('');
-  const [formElements, setFormElements] = useState([]);
+const FormBuilder = ({ selectedElementId, onUpdateLabel, onUpdatePlaceHolder }) => {
+  const [droppedElements, setDroppedElements] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
 
-  const handleAddOption = () => {
-    if (optionInput.trim() !== '') {
-      setOptions([...options, optionInput.trim()]);
-      setOptionInput('');
+  useEffect(() => {
+    if (selectedElementId !== null) {
+      setSelectedId(selectedElementId.id);
+    } else {
+      setSelectedId(null);
     }
-  };
+  }, [selectedElementId]);
 
-  const handleAddElement = (element) => {
-    setSelectedElement(element);
-    setQuestion('');
-  };
-
-  const handleAddFormElement = () => {
-    let newElement = null;
-    switch (selectedElement) {
-      case 'Text Input':
-        newElement = <input type="text" className="form-input" />;
-        break;
-      case 'Textarea':
-        newElement = <textarea className="form-textarea" />;
-        break;
-      case 'Select':
-        newElement = (
-          <select className="form-select">
-            <option value="">Select...</option>
-            {options.map((option, index) => (
-              <option key={index} value={option}>{option}</option>
-            ))}
-          </select>
-        );
-        break;
-      case 'Checkbox':
-        newElement = (
-          <div>
-            {options.map((option, index) => (
-              <div key={index} className="flex items-center mb-2">
-                <input type="checkbox" className="form-checkbox" />
-                <label>{option}</label>
-              </div>
-            ))}
-          </div>
-        );
-        break;
-      case 'Single Choice':
-        newElement = (
-          <div>
-            {options.map((option, index) => (
-              <div key={index} className="flex items-center mb-2">
-                <input type="radio" name="singleChoice" className="form-radio" />
-                <label>{option}</label>
-              </div>
-            ))}
-          </div>
-        );
-        break;
-      default:
-        break;
+  useEffect(() => {
+    if (selectedId !== null && selectedElementId) {
+      const updatedElements = droppedElements.map(element => {
+        if (element.id === selectedId) {
+          return { ...element, label: selectedElementId.label, placeholder: selectedElementId.placeholder };
+        }
+        return element;
+      });
+      setDroppedElements(updatedElements);
     }
+  }, [selectedElementId, droppedElements, selectedId]);
 
-    const newFormElement = {
-      element: newElement,
-      elementLabel: `${question}?`,
+  const handleDrop = (item) => {
+    const newElement = {
+      id: Math.random().toString(36).substr(2, 9),
+      type: item.name,
+      value: '',
+      placeholder: !(item.name === 'Select' || item.name === 'Single Choice' || item.name === 'Checkbox') ? `Enter ${item.name}` : '', 
+      options: item.name === 'Select' || item.name === 'Single Choice' || item.name === 'Checkbox' ? ['Option 1', 'Option 2', 'Option 3'] : [],
+      label: item.name
     };
+    setDroppedElements([...droppedElements, newElement]);
+  };
+  
+  const handleInputChange = (id, value) => {
+    const updatedElements = droppedElements.map(element => {
+      if (element.id === id) {
+        return { ...element, value };
+      }
+      return element;
+    });
+    setDroppedElements(updatedElements);
+  };
 
-    setFormElements([...formElements, newFormElement]);
-    setQuestion('');
-    setOptions([]);
+  const handleOptionChange = (id, index, value) => {
+    const updatedElements = droppedElements.map(element => {
+      if (element.id === id && (element.type === 'Select' || element.type === 'Single Choice' || element.type === 'Checkbox')) {
+        const updatedOptions = [...element.options];
+        updatedOptions[index] = value;
+        return { ...element, options: updatedOptions };
+      }
+      return element;
+    });
+    setDroppedElements(updatedElements);
   };
 
   const [, drop] = useDrop({
     accept: ItemTypes.ELEMENT,
-    drop(item) {
-      handleAddElement(item.name);
-    },
+    drop: (item) => handleDrop(item),
   });
 
+  const handleSelectElement = (id) => {
+    setSelectedId(id);
+  };
+
   return (
-    <div ref={drop} className="container mx-auto flex flex-col h-full p-6 bg-gray-50 rounded-lg shadow-md">
-      {selectedElement && (
-        <div className="mb-8">
-          <input
-            type="text"
-            placeholder="Enter the question..."
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            className="form-input border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-          />
-          {(selectedElement === 'Checkbox' || selectedElement === 'Select' || selectedElement === 'Single Choice') && (
-            <div className="flex items-center mt-4">
+    <div className="form-builder-container flex justify-center items-center h-full">
+      <div className="drop-area w-full h-full bg-white p-4 border border-blue-300 rounded" ref={drop}>
+        {droppedElements.map((element, index) => (
+          <div key={element.id} className={`flex flex-col mb-4 ${selectedId === element.id ? 'bg-red-100' : ''}`} onClick={() => handleSelectElement(element.id)}>
+            <h3 className="text-xl mb-2">{element.label}</h3> 
+            {element.type === 'Text Input' && (
               <input
                 type="text"
-                placeholder="Enter option..."
-                value={optionInput}
-                onChange={(e) => setOptionInput(e.target.value)}
-                className="form-input border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 mr-4"
+                placeholder={element.placeholder} 
+                value={element.value}
+                onChange={(e) => handleInputChange(element.id, e.target.value)}
+                className="border border-blue-500 rounded p-2"
               />
-              <button
-                className="btn bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded shadow focus:outline-none focus:ring-2 focus:ring-blue-500"
-                onClick={handleAddOption}
+            )}
+            {element.type === 'Textarea' && (
+              <textarea
+                placeholder={element.placeholder} 
+                value={element.value}
+                onChange={(e) => handleInputChange(element.id, e.target.value)}
+                className="border border-blue-500 rounded p-2"
+              />
+            )}
+            {element.type === 'Select' && (
+              <select
+                placeholder={element.placeholder} 
+                value={element.value}
+                onChange={(e) => handleInputChange(element.id, e.target.value)}
+                className="border border-blue-500 rounded p-2"
               >
-                Add Option
-              </button>
-            </div>
-          )}
-          <div className="mt-4">
-            {options.map((option, index) => (
-              <div key={index} className="bg-gray-200 rounded-md p-2 mb-2">{option}</div>
-            ))}
-          </div>
-          <button
-            className="btn mt-4 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded shadow focus:outline-none focus:ring-2 focus:ring-green-500"
-            onClick={handleAddFormElement}
-          >
-            Add {selectedElement}
-          </button>
-        </div>
-      )}
-      <div className="form-elements flex-grow">
-        {formElements.map(({ element, elementLabel }, index) => (
-          <div key={index} className="bg-white rounded-md shadow-md p-4 mb-4">
-            <p className="font-semibold text-gray-700 mb-2">{elementLabel}</p>
-            {element}
+                {element.options.map((option, idx) => (
+                  <option key={idx} value={option}>{option}</option>
+                ))}
+              </select>
+            )}
+            {(element.type === 'Single Choice' || element.type === 'Checkbox') && (
+              <div>
+                {element.options.map((option, idx) => (
+                  <div key={idx} className="flex items-center mb-2">
+                    {element.type === 'Single Choice' && (
+                      <input
+                        type="radio"
+                        name={`radio-${element.id}`}
+                        value={option}
+                        onChange={(e) => handleInputChange(element.id, e.target.value)}
+                        className="mr-2"
+                      />
+                    )}
+                    {element.type === 'Checkbox' && (
+                      <input
+                        type="checkbox"
+                        value={option}
+                        onChange={(e) => handleOptionChange(element.id, idx, e.target.value)}
+                        className="mr-2"
+                      />
+                    )}
+                    <label>{option}</label>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>

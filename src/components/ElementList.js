@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDrag } from 'react-dnd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFont, faAlignLeft, faList, faCheckSquare, faCircle } from '@fortawesome/free-solid-svg-icons'; 
@@ -10,14 +10,26 @@ const Element = ({ name, icon }) => {
     item: { name },
   });
 
+  const [hovered, setHovered] = useState(false);
+
+  const handleMouseEnter = () => {
+    setHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setHovered(false);
+  };
+
   return (
-    <button
+    <div
       ref={drag}
-      className="element-button block w-full bg-white hover:bg-gray-100 text-gray-800 font-semibold py-3 px-6 rounded-lg shadow-md flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-300"
+      className={`element-button w-full bg-white text-gray-800 font-semibold py-3 px-6 rounded-lg flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-300 ${hovered ? 'hover:bg-gray-100 shadow-md' : ''}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <FontAwesomeIcon icon={icon} className="text-blue-500 text-lg" />
       <span className="ml-2">{name}</span>
-    </button>
+    </div>
   );
 };
 
@@ -31,15 +43,13 @@ const ElementList = ({ setSelectedElement }) => {
   ];
 
   return (
-    <div className="element-list bg-white p-4 rounded-lg shadow-md">
+    <div className="element-list bg-white p-4 rounded-lg fixed inset-0 w-1/4 h-full overflow-y-auto">
       <h2 className="text-lg font-semibold mb-4">Form Elements</h2>
-      <ul className="space-y-4">
+      <div className="flex flex-col space-y-4">
         {elements.map((element, index) => (
-          <li key={index} className="element-item">
-            <Element name={element.name} icon={element.icon} />
-          </li>
+          <Element key={index} name={element.name} icon={element.icon} />
         ))}
-      </ul>
+      </div>
     </div>
   );
 };
